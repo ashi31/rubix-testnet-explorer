@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransDetails</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Transaction Details</h1>
+
+    <table id="transaction-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Transaction ID</th>
+                <th>Sender DID</th>
+                <th>Receiver DID</th>
+                <th>Token Time</th>
+                <th>Token IDs</th>
+                <th>Amount</th>
+                <th>Transaction Type</th>
+                <th>Quorum List</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- For table rows -->
+        </tbody>
+    </table>
+
+    <script>
+            const ws = new WebSocket('ws://localhost:2002');
+
+            ws.onmessage = function(event) {
+                const newData = JSON.parse(event.data);
+
+            const tableBody = document.getElementById('transaction-table').getElementsByTagName('tbody')[0];
+
+            const newRow = tableBody.insertRow();
+            newRow.insertCell().innerText = newData.id;
+            newRow.insertCell().innerText = newData.transaction_id;
+            newRow.insertCell().innerText = newData.sender_did;
+            newRow.insertCell().innerText = newData.receiver_did;
+            newRow.insertCell().innerText = newData.token_time;
+            newRow.insertCell().innerText = newData.token_id.join(', ');
+            newRow.insertCell().innerText = newData.amount;
+            newRow.insertCell().innerText = newData.transaction_type;
+            newRow.insertCell().innerText = newData.quorum_list.join(', ');
+        };
+
+        async function fetchData() {
+            const response = await fetch('/get-trans-data');
+            const data = await response.json();
+
+            const tableBody = document.getElementById('transaction-table').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+
+            data.forEach(row => {
+                const newRow = tableBody.insertRow();
+
+                // Insert cells and add data to the table
+                newRow.insertCell().innerText = row.id;
+                newRow.insertCell().innerText = row.transaction_id;
+                newRow.insertCell().innerText = row.sender_did;
+                newRow.insertCell().innerText = row.receiver_did;
+                newRow.insertCell().innerText = row.token_time;
+                newRow.insertCell().innerText = JSON.parse(row.token_id).join(', ');
+                newRow.insertCell().innerText = row.amount;
+                newRow.insertCell().innerText = row.transaction_type;
+                newRow.insertCell().innerText = JSON.parse(row.quorum_list).join(', ');
+            });
+        }
+
+        // Fetch the data initially when the page loads
+        fetchData();
+    </script>
+</body>
+</html>
